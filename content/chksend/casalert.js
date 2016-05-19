@@ -77,9 +77,10 @@ CASAlert.prototype.initList = function(items)
 				listitem.value = item.value;
 			}
 			this.list.appendChild(listitem);			
-			if (item.checked) {
+			if ('checked' in item) {
 				var checkitem = document.getElementById(item.checkitem);
-				checkitem.setAttribute("checked", "true");
+				if (item.checked)
+					checkitem.setAttribute("checked", true);
 				listitem.setAttribute("checkitem", item.checkitem);
 			}
 		} else { //listbox

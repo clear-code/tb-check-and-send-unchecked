@@ -572,7 +572,7 @@ CASRecipientsChecker.prototype.checkAddress = function(bySender, byAddrBook)
 			foundAddrs.push(
 				{label: addrTypeName + " " + addrItem.value, 
 				value: addrColId,
-				checked: true});
+				checked: false});
 				//type: addrTypeName});
 			addrItem.setAttribute("cas_highlighted", highlightColor);
 		}
@@ -649,7 +649,8 @@ CASRecipientsChecker.prototype.checkRecipientType = function()
 
 CASRecipientsChecker.prototype.checkAddressBySenderDomain = function()
 {
-	var senderIdKey = document.getElementById("msgIdentity").getAttribute("value");
+	var senderField = document.getElementById("msgIdentity");
+	var senderIdKey = senderField.selectedItem.getAttribute("identitykey");
 	var senderId = this.accountManager.getIdentity(senderIdKey);
 	var senderAddr = senderId.email;
 	var levelPref = this.prefWrapper.copyUnicharPref("chksend.sender_match_level", "0");
