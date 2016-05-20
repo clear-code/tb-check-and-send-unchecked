@@ -549,6 +549,7 @@ CASRecipientsChecker.prototype.checkAddress = function(bySender, byAddrBook)
 	}
 	
 	var inbook = this.prefWrapper.copyUnicharPref("chksend.check_addrbook_inbook","");
+	var defaultChecked = this.prefWrapper.getBoolPref("chksend.address_checked_by_default",false);
 	var cri = inbook == "found" ? 1 : 0;
 	var foundAddrs = new Array();
 	var addedAddrColId = new Array();
@@ -572,7 +573,7 @@ CASRecipientsChecker.prototype.checkAddress = function(bySender, byAddrBook)
 			foundAddrs.push(
 				{label: addrTypeName + " " + addrItem.value, 
 				value: addrColId,
-				checked: false});
+				checked: defaultChecked});
 				//type: addrTypeName});
 			addrItem.setAttribute("cas_highlighted", highlightColor);
 		}
