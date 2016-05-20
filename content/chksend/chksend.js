@@ -651,9 +651,14 @@ CASRecipientsChecker.prototype.checkRecipientType = function()
 CASRecipientsChecker.prototype.checkAddressBySenderDomain = function()
 {
 	var senderField = document.getElementById("msgIdentity");
-	var senderIdKey = senderField.selectedItem.getAttribute("identitykey");
+	var senderIdKey = senderField.getAttribute("value"); // old Tb
 	var senderId = this.accountManager.getIdentity(senderIdKey);
 	var senderAddr = senderId.email;
+	if (!senderAddr) { // Tb 38 and latert
+		senderIdKey = senderField.selectedItem.getAttribute("identitykey");
+		senderId = this.accountManager.getIdentity(senderIdKey);
+		senderAddr = senderId.email;
+	}
 	var levelPref = this.prefWrapper.copyUnicharPref("chksend.sender_match_level", "0");
 	var senderDomain = senderAddr.split("@")[1];
 	for (var key in this.checkList) {
