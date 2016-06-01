@@ -1,3 +1,9 @@
+var { Services } = Components.utils.import("resource://gre/modules/Services.jsm");
+function log(...aArgs) {
+  if (Services.prefs.getBoolPref("chksend.debug"))
+    Services.console.logStringMessage("check-and-send-unchecked: " + aArgs.join(', '));
+}
+
 Components.utils.import("resource:///modules/iteratorUtils.jsm"); // for fixIterator
 
 var gCASMain = null;
@@ -57,7 +63,6 @@ var SendMessageLater = function()
 	if (!gCASMain.confirmSend()) return;
 	CASSendMessageLaterOrg.apply(this, arguments);
 }
-
 
 //Class CheckAndSend
 function CheckAndSend()
@@ -517,6 +522,8 @@ CASRecipientsChecker.prototype.makeAddrCheckList = function()
 
 CASRecipientsChecker.prototype.checkAddress = function(bySender, byAddrBook)
 {
+	log("checkAddress: ", "bySender=" + bySender, "byAddrBook=" + byAddrBook);
+
 	//clear the highlights
 	for (var key in this.checkList) {
 		document.getElementById(key.split(":")[1]).setAttribute("cas_highlighted","none");
@@ -550,6 +557,7 @@ CASRecipientsChecker.prototype.checkAddress = function(bySender, byAddrBook)
 	
 	var inbook = this.prefWrapper.copyUnicharPref("chksend.check_addrbook_inbook","");
 	var defaultChecked = this.prefWrapper.getBoolPref("chksend.address_checked_by_default",false);
+	log("defaultChecked: " + defaultChecked);
 	var cri = inbook == "found" ? 1 : 0;
 	var foundAddrs = new Array();
 	var addedAddrColId = new Array();
