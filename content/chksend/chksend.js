@@ -580,7 +580,7 @@ CASRecipientsChecker.prototype.checkAddress = function(bySender, byAddrBook)
 	}
 
 	var title = this.localeBundle.getString("chksend.addr_title");
-	var message = this.localeBundle.getString("chksend.addr_alert");
+	var message = this.localeBundle.getString(defaultChecked ? "chksend.addr_alert" : "chksend.addr_alert_neg");
 	//var message = "Are you sure you want to send this message to the following recipients? Check addresses you want to send and press OK in order to continue sending.";
 
 	var okFunc = function(items) {
