@@ -1,3 +1,9 @@
+var { Services } = Components.utils.import("resource://gre/modules/Services.jsm");
+function log(...aArgs) {
+  if (Services.prefs.getBoolPref("chksend.debug"))
+    Services.console.logStringMessage("check-and-send-unchecked: " + aArgs.join(', '));
+}
+
 var gAlert = null;
 
 function onLoad()
@@ -13,6 +19,7 @@ function onLoad()
 
 function CASAlert(arg)
 {
+	log("CASAlert: " + "arg=" + JSON.stringify(arg));
 	this.arg = arg;
 	this.richlist = arg.richlist;
 	if (this.richlist) {
@@ -60,6 +67,8 @@ CASAlert.prototype.onCancel = function()
 
 CASAlert.prototype.initList = function(items)
 {
+	log("initList: " + "items=" + JSON.stringify(items));
+
 	if (!this.richlist) {
 		this.list.setAttribute("seltype", this.arg.seltype);
 		this.list.setAttribute("rows", this.arg.rows.toString());
@@ -68,8 +77,10 @@ CASAlert.prototype.initList = function(items)
 	var length = items.length;
 	for (var i=0; i<length; i++){
 		var item = items[i];
+	        log("generating item index: " + i);
 		var listitem;
 		if (this.richlist) { //richlistbox
+			log("richlistbox");
 			listitem = document.createElement("richlistitem");
 			listitem.appendChild(item.label);
 
@@ -79,11 +90,13 @@ CASAlert.prototype.initList = function(items)
 			this.list.appendChild(listitem);			
 			if ('checked' in item) {
 				var checkitem = document.getElementById(item.checkitem);
+				log("item.checked: " + item.checked);
 				if (item.checked)
 					checkitem.setAttribute("checked", true);
 				listitem.setAttribute("checkitem", item.checkitem);
 			}
 		} else { //listbox
+			log("listbox");
 			if (item.value){
 				listitem = this.list.appendItem(item.label, item.value);
 			} else {
@@ -91,6 +104,7 @@ CASAlert.prototype.initList = function(items)
 			}
 			if (this.arg.checkbox) {
 				listitem.setAttribute("type", "checkbox");
+				log("item.checked: " + item.checked);
 				if (item.checked)
 					listitem.setAttribute("checked", "true");
 			}
