@@ -118,11 +118,6 @@ CheckAndSend.prototype.clearAllHighlights = function(event)
 
 CheckAndSend.prototype.preConfirm = function()
 {
-	var msgCompFields = gMsgCompose.compFields;
-	Recipients2CompFields(msgCompFields);
-	gMsgCompose.expandMailingLists();
-	CompFields2Recipients(msgCompFields);
-
 	var identity = document.getElementById("msgIdentity").value;
 	this.prefWrapper = new CASPrefWrapper(identity);
 	var recipReplaceEvent = this.prefWrapper.getIntPref("chksend.recip_replace_event",1);
@@ -134,6 +129,11 @@ CheckAndSend.prototype.preConfirm = function()
 
 CheckAndSend.prototype.confirmSend = function()
 {
+	var msgCompFields = gMsgCompose.compFields;
+	Recipients2CompFields(msgCompFields);
+	gMsgCompose.expandMailingLists();
+	CompFields2Recipients(msgCompFields);
+
 	var identity = document.getElementById("msgIdentity").value;
 	this.prefWrapper = new CASPrefWrapper(identity);
 	var useNote = true; //true only for TB2
