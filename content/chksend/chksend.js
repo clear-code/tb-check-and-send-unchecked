@@ -118,9 +118,10 @@ CheckAndSend.prototype.clearAllHighlights = function(event)
 
 CheckAndSend.prototype.preConfirm = function()
 {
+	var msgCompFields = gMsgCompose.compFields;
+	Recipients2CompFields(msgCompFields);
 	gMsgCompose.expandMailingLists();
-    var msgCompFields = gMsgCompose.compFields;
-    Recipients2CompFields(msgCompFields);
+	CompFields2Recipients(msgCompFields);
 
 	var identity = document.getElementById("msgIdentity").value;
 	this.prefWrapper = new CASPrefWrapper(identity);
