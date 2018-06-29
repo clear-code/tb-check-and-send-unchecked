@@ -87,18 +87,18 @@ CASSetting.prototype.savePrefs = function() {
 		var prefStr = prefix ? prefix+element.getAttribute("prefstring") : element.getAttribute("prefstring");
 		var eltType = element.localName;
 		if (eltType == "radiogroup")
-		  nsPreferences.setIntPref(prefStr, parseInt(element.value));
+		  gCASPreferences.setIntPref(prefStr, parseInt(element.value));
 		else if (eltType == "checkbox")
-		  nsPreferences.setBoolPref(prefStr, element.checked);
+		  gCASPreferences.setBoolPref(prefStr, element.checked);
 		else if (eltType == "textbox")
-		  nsPreferences.setUnicharPref(prefStr, element.value);
+		  gCASPreferences.setUnicharPref(prefStr, element.value);
 		else if (eltType == "menulist" && element.getAttribute("preftype") == "string") {
-			nsPreferences.setUnicharPref(prefStr, element.value);
+			gCASPreferences.setUnicharPref(prefStr, element.value);
 		}
 		else if (eltType == "menulist")
-		  nsPreferences.setIntPref(prefStr, element.selectedIndex);
+		  gCASPreferences.setIntPref(prefStr, element.selectedIndex);
 		else if (eltType == "label")
-		  nsPreferences.setUnicharPref(prefStr, element.getAttribute("skey"));
+		  gCASPreferences.setUnicharPref(prefStr, element.getAttribute("skey"));
 	}
 
 	return true;
@@ -120,32 +120,32 @@ CASSetting.prototype.applyPrefsToPanes = function(prefPrefix)
 		var prefStr = prefix ? prefix+element.getAttribute("prefstring") : element.getAttribute("prefstring")		
 		var eltType = element.localName;
 		if (eltType == "radiogroup") {
-			var index = nsPreferences.getIntPref(prefStr, null);
+			var index = gCASPreferences.getIntPref(prefStr, null);
 			if (index == null) {
 				index = parseInt(element.getAttribute("defaultpref"));
-				nsPreferences.setIntPref(prefStr, index);
+				gCASPreferences.setIntPref(prefStr, index);
 			}
 			element.selectedItem = element.childNodes[index];
 		} else if (eltType == "checkbox") {
-			var checked = nsPreferences.getBoolPref(prefStr, null);
+			var checked = gCASPreferences.getBoolPref(prefStr, null);
 			if (checked == null) {
 				if (elementID == "CSUseDefault" && !prefix) {
 					checked = false;
 				} else {
 					checked = ( element.getAttribute("defaultpref") == "true" );
 				}
-				nsPreferences.setBoolPref(prefStr, checked);
+				gCASPreferences.setBoolPref(prefStr, checked);
 			}
 			element.checked = checked;
 		} else if (eltType == "textbox") {
-			var str = nsPreferences.copyUnicharPref(prefStr, null);
+			var str = gCASPreferences.copyUnicharPref(prefStr, null);
 			if (str != null) element.setAttribute("value", str);
 			else {
 				element.setAttribute("value", element.getAttribute("defaultpref") );
-				nsPreferences.setUnicharPref(prefStr, element.getAttribute("defaultpref") );
+				gCASPreferences.setUnicharPref(prefStr, element.getAttribute("defaultpref") );
 			}
 		} else if (eltType == "menulist" && element.getAttribute("preftype") == "string") {
-			var str = nsPreferences.copyUnicharPref(prefStr, null);
+			var str = gCASPreferences.copyUnicharPref(prefStr, null);
 			if (str != null) {
 				element.value = str;
 			} else {
@@ -154,10 +154,10 @@ CASSetting.prototype.applyPrefsToPanes = function(prefPrefix)
 				else element.selectedIndex = 1;
 			}
 		} else if (eltType == "menulist") {
-			var index = nsPreferences.getIntPref(prefStr, null);
+			var index = gCASPreferences.getIntPref(prefStr, null);
 			if (index == null) {
 				index = parseInt(element.getAttribute("defaultpref"));
-				nsPreferences.setIntPref(prefStr, index);
+				gCASPreferences.setIntPref(prefStr, index);
 			}
 			element.selectedIndex = index;
 		}

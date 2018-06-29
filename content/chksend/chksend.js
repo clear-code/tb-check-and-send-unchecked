@@ -36,14 +36,14 @@ window.addEventListener("close", CASSetupper.finalizeCAS, false);
 
 //Override original functions
 var CASSendMessageOrg = SendMessage;
-var SendMessage = function()
+SendMessage = function()
 {
 	if (!gCASMain) gCASMain = new CheckAndSend();
 	if (!gCASMain.confirmSend()) return;
 	CASSendMessageOrg.apply(this, arguments);
 }
 var CASSendMessageWithCheckOrg = SendMessageWithCheck;
-var SendMessageWithCheck = function() //Ctrl-Enter
+SendMessageWithCheck = function() //Ctrl-Enter
 {
 	if (!gCASMain) gCASMain = new CheckAndSend();
 	if (!gCASMain.confirmSend()) return;
@@ -51,7 +51,7 @@ var SendMessageWithCheck = function() //Ctrl-Enter
 }
 
 var CASSendMessageLaterOrg = SendMessageLater;
-var SendMessageLater = function()
+SendMessageLater = function()
 {
 	if (!gCASMain) gCASMain = new CheckAndSend();
 	if (!gCASMain.confirmSend()) return;
@@ -486,12 +486,14 @@ CASRecipientsChecker.prototype.makeAddrCheckList = function()
 			var names = {};
 			var fullNames = {};
 			var count = 0;
+			/*
 			var reformattedAddrs = "";
 			try {
 				reformattedAddrs = this.hdrParser.reformatUnquotedAddresses(addr);
 			} catch(e) {
 				reformattedAddrs = addr;
 			}
+			*/
 			this.hdrParser.parseHeadersWithArray(addr, addresses, names, fullNames, count);
 			//this.hdrParser.parseHeadersWithArray(addr, addresses, names, fullNames);
 			for (var i=0; i<addresses.value.length; i++) {
@@ -651,16 +653,19 @@ CASRecipientsChecker.prototype.checkAddressBySenderDomain = function()
 {
 	var senderIdKey = document.getElementById("msgIdentity").getAttribute("value");
 	var senderId = this.accountManager.getIdentity(senderIdKey);
-	var senderAddr = senderId.email;
-	var levelPref = this.prefWrapper.copyUnicharPref("chksend.sender_match_level", "0");
-	var senderDomain = senderAddr.split("@")[1];
-	for (var key in this.checkList) {
-		if (this.checkList[key] != 0) continue;
-		var addr = key.split(":")[0];
-		var domain = addr.split("@")[1];
-//		if (domain != senderDomain) checkList[key] = 2;
-		if (!domain) continue;
-		if (!this.matchDomains(senderDomain, domain, levelPref)) this.checkList[key] = 2;
+	//var senderAddr = senderId.email; //nsIMsgIdentity.email is null on TB52
+	var senderAddr = senderId.toString().split(/<|>/)[1];
+	if (senderAddr) {
+		var levelPref = this.prefWrapper.copyUnicharPref("chksend.sender_match_level", "0");
+		var senderDomain = senderAddr.split("@")[1];
+		for (var key in this.checkList) {
+			if (this.checkList[key] != 0) continue;
+			var addr = key.split(":")[0];
+			var domain = addr.split("@")[1];
+		//	if (domain != senderDomain) checkList[key] = 2;
+			if (!domain) continue;
+			if (!this.matchDomains(senderDomain, domain, levelPref)) this.checkList[key] = 2;
+		}
 	}
 }
 
@@ -897,6 +902,7 @@ CASRecipientsChecker.prototype.correctRecipientNames = function(addrs, addrbooks
 	var names = {};
 	var fullNames = {};
 	var count = 0;
+	/*
 	var reformattedAddrs = "";
 	try {
 		reformattedAddrs = this.hdrParser.reformatUnquotedAddresses(addrs);
@@ -904,6 +910,8 @@ CASRecipientsChecker.prototype.correctRecipientNames = function(addrs, addrbooks
 		reformattedAddrs = addrs;
 	}
 	this.hdrParser.parseHeadersWithArray(reformattedAddrs, addresses, names, fullNames, count);
+	*/
+	this.hdrParser.parseHeadersWithArray(addrs, addresses, names, fullNames, count);
 	//this.hdrParser.parseHeadersWithArray(addrs, addresses, names, fullNames);
 	for (var i=0; i<addresses.value.length; i++) {
 		var card = null;
@@ -923,7 +931,8 @@ CASRecipientsChecker.prototype.correctRecipientNames = function(addrs, addrbooks
 		if (card) {
 			var name = card.displayName;
 			//ret += this.hdrParser.makeFullAddressWString(name, addr);
-			ret += this.hdrParser.makeFullAddress(name, addr);
+			//ret += this.hdrParser.makeFullAddress(name, addr);
+			ret += this.hdrParser.makeMailboxObject(name, addr).toString();
 		} else if (fullNames[i]){
 			ret += fullNames[i];
 		} else {
@@ -939,6 +948,7 @@ CASRecipientsChecker.prototype.removeRecipientNames = function(addrs)
 	var names = {};
 	var fullNames = {};
 	var count = 0;
+	/*
 	var reformattedAddrs = "";
 	try {
 		reformattedAddrs = this.hdrParser.reformatUnquotedAddresses(addrs);
@@ -947,6 +957,8 @@ CASRecipientsChecker.prototype.removeRecipientNames = function(addrs)
 	}
 
 	this.hdrParser.parseHeadersWithArray(reformattedAddrs, addresses, names, fullNames, count);
+	*/
+	this.hdrParser.parseHeadersWithArray(addrs, addresses, names, fullNames, count);
 	//this.hdrParser.parseHeadersWithArray(addr, addresses, names, fullNames);
 	
 	var ret = new Array();
@@ -1242,30 +1254,30 @@ CASRegExp.prototype.toFinderQueries = function(checkSubject, subjectOnly)
 function CASPrefWrapper(identity)
 {
 	var tempPrefix = "mail.identity."+identity+".";
-	var useDefault = nsPreferences.getBoolPref(tempPrefix+"chksend.use_default_pref", true);
+	var useDefault = gCASPreferences.getBoolPref(tempPrefix+"chksend.use_default_pref", true);
 	this.prefix = useDefault ? "" : tempPrefix;
 }
 
 CASPrefWrapper.prototype.getBoolPref = function(prefStr, defValue)
 {
-	var pref = nsPreferences.getBoolPref(this.prefix+prefStr, null);
+	var pref = gCASPreferences.getBoolPref(this.prefix+prefStr, null);
 	if (pref == null)
-		pref = nsPreferences.getBoolPref(prefStr, defValue);
+		pref = gCASPreferences.getBoolPref(prefStr, defValue);
 	return pref;
 }
 
 CASPrefWrapper.prototype.copyUnicharPref = function(prefStr, defValue)
 {
-	var pref = nsPreferences.copyUnicharPref(this.prefix+prefStr, null);
+	var pref = gCASPreferences.copyUnicharPref(this.prefix+prefStr, null);
 	if (pref == null)
-		pref = nsPreferences.copyUnicharPref(prefStr, defValue);
+		pref = gCASPreferences.copyUnicharPref(prefStr, defValue);
 	return pref;
 }
 
 CASPrefWrapper.prototype.getIntPref = function(prefStr, defValue)
 {
-	var pref = nsPreferences.getIntPref(this.prefix+prefStr, null);
+	var pref = gCASPreferences.getIntPref(this.prefix+prefStr, null);
 	if (pref == null)
-		pref = nsPreferences.getIntPref(prefStr, defValue);
+		pref = gCASPreferences.getIntPref(prefStr, defValue);
 	return pref;
 }

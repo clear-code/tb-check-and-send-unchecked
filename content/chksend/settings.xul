@@ -15,7 +15,7 @@
   ondialogaccept="return gCASSet.savePrefs();"
   ondialogcancel="return gCASSet.cancelPrefs();"
   persist="screenX screenY">
-  <script type="application/x-javascript" src="chrome://global/content/nsUserSettings.js"/>
+  <script type="application/x-javascript" src="chrome://chksend/content/utils.js"/>
   <script type="application/x-javascript" src="chrome://chksend/content/settings.js"/>
 
   <broadcasterset id="CASSetBroadcasters">
