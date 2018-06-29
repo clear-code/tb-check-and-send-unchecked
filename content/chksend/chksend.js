@@ -1,3 +1,9 @@
+var { Services } = Components.utils.import("resource://gre/modules/Services.jsm");
+function log(...aArgs) {
+  if (Services.prefs.getBoolPref("chksend.debug"))
+    Services.console.logStringMessage("check-and-send-unchecked: " + aArgs.join(', '));
+}
+
 Components.utils.import("resource:///modules/iteratorUtils.jsm"); // for fixIterator
 
 var gCASMain = null;
@@ -57,7 +63,6 @@ SendMessageLater = function()
 	if (!gCASMain.confirmSend()) return;
 	CASSendMessageLaterOrg.apply(this, arguments);
 }
-
 
 //Class CheckAndSend
 function CheckAndSend()
@@ -124,6 +129,11 @@ CheckAndSend.prototype.preConfirm = function()
 
 CheckAndSend.prototype.confirmSend = function()
 {
+	var msgCompFields = gMsgCompose.compFields;
+	Recipients2CompFields(msgCompFields);
+	gMsgCompose.expandMailingLists();
+	CompFields2Recipients(msgCompFields);
+
 	var identity = document.getElementById("msgIdentity").value;
 	this.prefWrapper = new CASPrefWrapper(identity);
 	var useNote = true; //true only for TB2
@@ -519,6 +529,8 @@ CASRecipientsChecker.prototype.makeAddrCheckList = function()
 
 CASRecipientsChecker.prototype.checkAddress = function(bySender, byAddrBook)
 {
+	log("checkAddress: ", "bySender=" + bySender, "byAddrBook=" + byAddrBook);
+
 	//clear the highlights
 	for (var key in this.checkList) {
 		document.getElementById(key.split(":")[1]).setAttribute("cas_highlighted","none");
@@ -551,6 +563,8 @@ CASRecipientsChecker.prototype.checkAddress = function(bySender, byAddrBook)
 	}
 	
 	var inbook = this.prefWrapper.copyUnicharPref("chksend.check_addrbook_inbook","");
+	var defaultChecked = this.prefWrapper.getBoolPref("chksend.address_checked_by_default",false);
+	log("defaultChecked: " + defaultChecked);
 	var cri = inbook == "found" ? 1 : 0;
 	var foundAddrs = new Array();
 	var addedAddrColId = new Array();
@@ -574,14 +588,14 @@ CASRecipientsChecker.prototype.checkAddress = function(bySender, byAddrBook)
 			foundAddrs.push(
 				{label: addrTypeName + " " + addrItem.value, 
 				value: addrColId,
-				checked: true});
+				checked: defaultChecked});
 				//type: addrTypeName});
 			addrItem.setAttribute("cas_highlighted", highlightColor);
 		}
 	}
 
 	var title = this.localeBundle.getString("chksend.addr_title");
-	var message = this.localeBundle.getString("chksend.addr_alert");
+	var message = this.localeBundle.getString(defaultChecked ? "chksend.addr_alert" : "chksend.addr_alert_neg");
 	//var message = "Are you sure you want to send this message to the following recipients? Check addresses you want to send and press OK in order to continue sending.";
 
 	var okFunc = function(items) {
@@ -651,21 +665,24 @@ CASRecipientsChecker.prototype.checkRecipientType = function()
 
 CASRecipientsChecker.prototype.checkAddressBySenderDomain = function()
 {
-	var senderIdKey = document.getElementById("msgIdentity").getAttribute("value");
+	var senderField = document.getElementById("msgIdentity");
+	var senderIdKey = senderField.getAttribute("value"); // old Tb
 	var senderId = this.accountManager.getIdentity(senderIdKey);
-	//var senderAddr = senderId.email; //nsIMsgIdentity.email is null on TB52
-	var senderAddr = senderId.toString().split(/<|>/)[1];
-	if (senderAddr) {
-		var levelPref = this.prefWrapper.copyUnicharPref("chksend.sender_match_level", "0");
-		var senderDomain = senderAddr.split("@")[1];
-		for (var key in this.checkList) {
-			if (this.checkList[key] != 0) continue;
-			var addr = key.split(":")[0];
-			var domain = addr.split("@")[1];
-		//	if (domain != senderDomain) checkList[key] = 2;
-			if (!domain) continue;
-			if (!this.matchDomains(senderDomain, domain, levelPref)) this.checkList[key] = 2;
-		}
+	var senderAddr = senderId.email;
+	if (!senderAddr) { // Tb 38 and latert
+		senderIdKey = senderField.selectedItem.getAttribute("identitykey");
+		senderId = this.accountManager.getIdentity(senderIdKey);
+		senderAddr = senderId.email;
+	}
+	var levelPref = this.prefWrapper.copyUnicharPref("chksend.sender_match_level", "0");
+	var senderDomain = senderAddr.split("@")[1];
+	for (var key in this.checkList) {
+		if (this.checkList[key] != 0) continue;
+		var addr = key.split(":")[0];
+		var domain = addr.split("@")[1];
+//		if (domain != senderDomain) checkList[key] = 2;
+		if (!domain) continue;
+		if (!this.matchDomains(senderDomain, domain, levelPref)) this.checkList[key] = 2;
 	}
 }
 

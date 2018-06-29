@@ -3,11 +3,12 @@
 
  <Description about="urn:mozilla:install-manifest">
 
-  <em:id>{1B0ADFEC-846C-401D-BA54-7842CBD485D4}</em:id>
-  <em:name>Check and Send</em:name>
-  <em:version>1.0.11</em:version>
+  <em:id>check-and-send-unchecked@clear-code.com</em:id>
+  <em:name>Check and Send Unchecked</em:name>
+  <em:version>1.0.11+</em:version>
   <em:description>Confirm before sending mail.</em:description>
   <em:creator>H.Ogi</em:creator>
+  <em:developer>ClearCode Inc.</em:developer>
   <em:optionsURL>chrome://chksend/content/settings.xul</em:optionsURL>
 	<em:iconURL></em:iconURL>
 	<em:homepageURL>http://hogi.sakura.ne.jp/en/</em:homepageURL>
