@@ -5,7 +5,7 @@
 
   <em:id>check-and-send-unchecked@clear-code.com</em:id>
   <em:name>Check and Send Unchecked</em:name>
-  <em:version>1.0.11+</em:version>
+  <em:version>1.0.12+</em:version>
   <em:description>Confirm before sending mail.</em:description>
   <em:creator>H.Ogi</em:creator>
   <em:developer>ClearCode Inc.</em:developer>

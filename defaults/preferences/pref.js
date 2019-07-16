@@ -4,3 +4,5 @@ pref("chksend.attach_words","");
 pref("chksend.ignore_quote",true);
 pref("chksend.address_checked_by_default",false);
 pref("chksend.debug",false);
+pref("chksend.overrideDelay", 0);
+pref("chksend.overrideDelayTimes", 0);

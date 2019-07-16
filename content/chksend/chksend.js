@@ -40,29 +40,52 @@ window.addEventListener("load", CASSetupper.initCAS, false);
 //document.getElementById("msgcomposeWindow").addEventListener("compose-window-reopen", CASSetupper.initCAS, false);
 window.addEventListener("close", CASSetupper.finalizeCAS, false);
 
-//Override original functions
-var CASSendMessageOrg = SendMessage;
-SendMessage = function()
-{
-	if (!gCASMain) gCASMain = new CheckAndSend();
-	if (!gCASMain.confirmSend()) return;
-	CASSendMessageOrg.apply(this, arguments);
-}
-var CASSendMessageWithCheckOrg = SendMessageWithCheck;
-SendMessageWithCheck = function() //Ctrl-Enter
-{
-	if (!gCASMain) gCASMain = new CheckAndSend();
-	if (!gCASMain.confirmSend()) return;
-	CASSendMessageWithCheckOrg.apply(this, arguments);
-}
 
-var CASSendMessageLaterOrg = SendMessageLater;
-SendMessageLater = function()
-{
-	if (!gCASMain) gCASMain = new CheckAndSend();
-	if (!gCASMain.confirmSend()) return;
-	CASSendMessageLaterOrg.apply(this, arguments);
-}
+
+(function() {
+	var override = function() {
+		//Override original functions
+		var CASSendMessageOrg = window.SendMessage;
+		window.SendMessage = function()
+		{
+			if (!gCASMain) gCASMain = new CheckAndSend();
+			if (!gCASMain.confirmSend()) return;
+			CASSendMessageOrg.apply(this, arguments);
+		}
+		var CASSendMessageWithCheckOrg = window.SendMessageWithCheck;
+		window.SendMessageWithCheck = function() //Ctrl-Enter
+		{
+			if (!gCASMain) gCASMain = new CheckAndSend();
+			if (!gCASMain.confirmSend()) return;
+			CASSendMessageWithCheckOrg.apply(this, arguments);
+		}
+
+		var CASSendMessageLaterOrg = window.SendMessageLater;
+		window.SendMessageLater = function()
+		{
+			if (!gCASMain) gCASMain = new CheckAndSend();
+			if (!gCASMain.confirmSend()) return;
+			CASSendMessageLaterOrg.apply(this, arguments);
+		}
+	};
+
+	const delay = gCASPreferences.getIntPref('chksend.overrideDelay');
+	let toBeDelayedTimes = gCASPreferences.getIntPref('chksend.overrideDelayTimes');
+
+	const tryOverride = function() {
+		if (toBeDelayedTimes > 0) {
+			toBeDelayedTimes--;
+			setTimeout(tryOverride, delay);
+			return;
+		}
+
+		if (delay <= 0)
+			override();
+		else
+			setTimeout(override, delay);
+	};
+	tryOverride();
+})();
 
 //Class CheckAndSend
 function CheckAndSend()
